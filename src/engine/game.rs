@@ -5,12 +5,12 @@ use macroquad::rand;
 const NUM_OF_CELLS: usize = (ROWS * COLS) as usize;
 
 pub struct Game {
-    board: [i32; NUM_OF_CELLS],
+    board: Vec<i32>,
 }
 
 impl Game {
     pub fn new() -> Self {
-        let board = [0; NUM_OF_CELLS];
+        let board = vec![0; NUM_OF_CELLS];
         Self { board }
     }
 
@@ -63,7 +63,13 @@ impl Game {
         // 0
         let index = col + (COLS * row);
         // 9 + (0 * 10)
-        self.board[index as usize] = 1;
+        for i in -2..2 {
+            let index_val = index + i;
+            if index_val < 0 || index_val as usize >= self.board.len() {
+                continue;
+            }
+            self.board[index_val as usize] = 1;
+        }
     }
 
     fn move_particles(&mut self) {
