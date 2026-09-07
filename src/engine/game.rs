@@ -1,5 +1,6 @@
 use crate::engine::consts::{BLOCK_SIZE, COLS, ROWS};
 use macroquad::prelude::*;
+use macroquad::rand;
 
 const NUM_OF_CELLS: usize = (ROWS * COLS) as usize;
 
@@ -70,10 +71,22 @@ impl Game {
             if self.board[i] == 0 {
                 continue;
             }
-            let is_in_bound = i + (COLS as usize) < self.board.len();
 
+            let target_spot = i + (COLS as usize);
+            let is_in_bound = target_spot < self.board.len();
+
+            // Moving down
             if is_in_bound && self.board[i + COLS as usize] == 0 {
-                self.board[i + COLS as usize] = 1;
+                self.board[target_spot] = 1;
+                self.board[i] = 0;
+                continue;
+            }
+
+            // Moving down sideways
+            let dx: i32 = if rand::gen_range(0, 2) == 0 { -1 } else { 1 };
+            let is_in_bound = (target_spot as i32 + dx) < self.board.len() as i32;
+            if is_in_bound && self.board[(target_spot as i32 + dx) as usize] == 0 {
+                self.board[(target_spot as i32 + dx) as usize] = 1;
                 self.board[i] = 0;
             }
         }
