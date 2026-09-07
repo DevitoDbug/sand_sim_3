@@ -6,5 +6,4 @@
 you spawn into the board.
 
 ## Screen grab
-![board](https://github.com/DevitoDbug/sand_sim/blob/master/docs/screen_cast.gif?raw=true)
-
+![board](https://github.com/DevitoDbug/sand_sim_3/blob/master/docs/screen_cast.gif?raw=true)
