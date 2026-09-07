@@ -1,20 +1,36 @@
 use crate::engine::consts::{BLOCK_SIZE, COLS, ROWS};
 use macroquad::prelude::*;
-use macroquad::rand;
+use macroquad::{color, rand};
 
 const NUM_OF_CELLS: usize = (ROWS * COLS) as usize;
 
+#[derive(Debug)]
+struct Particle {
+    val: i32,
+    color: color::Color,
+}
+
+impl Particle {
+    fn new(val: i32, color: color::Color) -> Self {
+        Self { val, color }
+    }
+}
+
 pub struct Game {
-    board: Vec<i32>,
+    board: Vec<Particle>,
+    color: color::Color,
 }
 
 impl Game {
     pub fn new() -> Self {
-        let board = vec![0; NUM_OF_CELLS];
-        Self { board }
+        let board: Vec<Particle> = (0..NUM_OF_CELLS).map(|_| Particle::new(0, WHITE)).collect();
+        Self { board, color: RED }
     }
 
     pub async fn render(&mut self) {
+        let mut time = 0.;
+        let colors = [GOLD, RED, VIOLET, ORANGE, BLUE, PURPLE];
+        let mut color_index = 0;
         loop {
             clear_background(WHITE);
             self.render_board();
@@ -23,13 +39,23 @@ impl Game {
                 self.spawn_particle();
             }
             self.move_particles();
+
+            if time >= 5. {
+                time = 0.;
+                color_index += 1;
+                if color_index >= colors.len() {
+                    color_index = 0
+                }
+            }
+            time += get_frame_time();
+            self.color = colors[color_index];
             next_frame().await;
         }
     }
 
     fn render_board(&self) {
-        for (i, val) in self.board.iter().rev().enumerate() {
-            if *val == 0 {
+        for (i, particle) in self.board.iter().rev().enumerate() {
+            if particle.val == 0 {
                 continue;
             }
 
@@ -46,7 +72,7 @@ impl Game {
                 y as f32 * BLOCK_SIZE,
                 BLOCK_SIZE,
                 BLOCK_SIZE,
-                RED,
+                particle.color,
             );
         }
     }
@@ -63,18 +89,19 @@ impl Game {
         // 0
         let index = col + (COLS * row);
         // 9 + (0 * 10)
-        for i in -2..2 {
+        for i in -3..3 {
             let index_val = index + i;
             if index_val < 0 || index_val as usize >= self.board.len() {
                 continue;
             }
-            self.board[index_val as usize] = 1;
+            self.board[index_val as usize].val = 1;
+            self.board[index_val as usize].color = self.color;
         }
     }
 
     fn move_particles(&mut self) {
         for i in (0..self.board.len()).rev() {
-            if self.board[i] == 0 {
+            if self.board[i].val == 0 {
                 continue;
             }
 
@@ -82,18 +109,24 @@ impl Game {
             let is_in_bound = target_spot < self.board.len();
 
             // Moving down
-            if is_in_bound && self.board[i + COLS as usize] == 0 {
-                self.board[target_spot] = 1;
-                self.board[i] = 0;
+            if is_in_bound && self.board[i + COLS as usize].val == 0 {
+                self.board[target_spot].val = 1;
+                self.board[target_spot].color = self.board[i].color;
+
+                self.board[i].val = 0;
+                self.board[i].color = WHITE;
                 continue;
             }
 
             // Moving down sideways
             let dx: i32 = if rand::gen_range(0, 2) == 0 { -1 } else { 1 };
             let is_in_bound = (target_spot as i32 + dx) < self.board.len() as i32;
-            if is_in_bound && self.board[(target_spot as i32 + dx) as usize] == 0 {
-                self.board[(target_spot as i32 + dx) as usize] = 1;
-                self.board[i] = 0;
+            if is_in_bound && self.board[(target_spot as i32 + dx) as usize].val == 0 {
+                self.board[(target_spot as i32 + dx) as usize].val = 1;
+                self.board[(target_spot as i32 + dx) as usize].color = self.board[i].color;
+
+                self.board[i].val = 0;
+                self.board[i].color = WHITE;
             }
         }
     }
