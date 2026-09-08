@@ -1,24 +1,24 @@
 use crate::engine::consts::{BLOCK_SIZE, COLS, ROWS};
 use macroquad::prelude::*;
-use macroquad::{color, rand};
+use macroquad::{color::Color, rand::gen_range};
 
 const NUM_OF_CELLS: usize = (ROWS * COLS) as usize;
 
 #[derive(Debug)]
 struct Particle {
     val: i32,
-    color: color::Color,
+    color: Color,
 }
 
 impl Particle {
-    fn new(val: i32, color: color::Color) -> Self {
+    fn new(val: i32, color: Color) -> Self {
         Self { val, color }
     }
 }
 
 pub struct Game {
     board: Vec<Particle>,
-    color: color::Color,
+    color: Color,
 }
 
 impl Game {
@@ -119,7 +119,7 @@ impl Game {
             }
 
             // Moving down sideways
-            let dx: i32 = if rand::gen_range(0, 2) == 0 { -1 } else { 1 };
+            let dx: i32 = if gen_range(0, 2) == 0 { -1 } else { 1 };
             let is_in_bound = (target_spot as i32 + dx) < self.board.len() as i32;
             if is_in_bound && self.board[(target_spot as i32 + dx) as usize].val == 0 {
                 self.board[(target_spot as i32 + dx) as usize].val = 1;
